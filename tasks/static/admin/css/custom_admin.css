@@ -1,0 +1,29 @@
+/* Custom styling for the Task Manager Admin */
+
+/* Highlight High Priority tasks with a red left border */
+.field-priority:contains("High"), .field-priority:contains("Critical") {
+    color: #d9534f;
+    font-weight: bold;
+}
+
+/* Style the filter sidebar for better visibility */
+#changelist-filter {
+    background-color: #f8f9fa;
+    border-left: 1px solid #ddd;
+}
+
+#changelist-filter h2 {
+    background: #417690;
+    color: white;
+    padding: 10px;
+    margin: 0;
+}
+
+/* Make the Task list rows more readable */
+.results tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.results tr:hover {
+    background-color: #e9ecef !important;
+}
