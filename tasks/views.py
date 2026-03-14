@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from .models import Task, Priority, Category
 
-# --- 1. SIGNUP VIEW (Fixed the missing attribute error) ---
+# --- 1. SIGNUP VIEW ---
 def signup_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -43,6 +43,7 @@ def dashboard(request):
             p_id = request.POST.get('priority')
             c_id = request.POST.get('category')
             
+            # Integrity check: only save if all fields are selected
             if title and deadline and p_id and c_id:
                 Task.objects.create(
                     user=request.user,
@@ -51,22 +52,28 @@ def dashboard(request):
                     priority_id=p_id,
                     category_id=c_id
                 )
+        
         elif 'delete_id' in request.POST:
             get_object_or_404(Task, id=request.POST.get('delete_id'), user=request.user).delete()
+        
         elif 'toggle_id' in request.POST:
             task = get_object_or_404(Task, id=request.POST.get('toggle_id'), user=request.user)
             task.is_completed = not task.is_completed
             task.save()
+            
         return redirect('dashboard')
 
+    # GET DATA
     tasks = Task.objects.filter(user=request.user).order_by('is_completed', 'deadline')
+    
+    # Calculate Progress
     total = tasks.count()
     completed = tasks.filter(is_completed=True).count()
     progress = (completed / total * 100) if total > 0 else 0
 
     return render(request, 'tasks/dashboard.html', {
         'tasks': tasks,
-        'priorities': Priority.objects.all(),
-        'categories': Category.objects.all(),
+        'priorities': Priority.objects.all(), # Sends choices to the dropdown
+        'categories': Category.objects.all(), # Sends choices to the dropdown
         'progress_percentage': progress,
     })
