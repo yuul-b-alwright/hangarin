@@ -1,0 +1,58 @@
+# Virtual Environment
+Lib/
+Include/
+Scripts/
+pyvenv.cfg
+venv/
+env/
+ENV/
+.venv
+
+# Python cache and compiled files
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Database files
+db.sqlite3
+*.db
+*.sqlite
+
+# Local environment variables
+.env
+.env.local
+.env*.local
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# Django
+staticfiles/
+media/
+/static/
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+requirements_minimal.txt
