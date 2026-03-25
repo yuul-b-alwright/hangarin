@@ -1,27 +1,16 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+# Environments
+Lib/
+Include/
+Scripts/
+pyvenv.cfg
 
-# Virtual Environment
-venv/
-env/
-ENV/
-bin/
-lib/
-include/
+# Python cache
+**/__pycache__/
+*.pyc
 
-# Database (Keep your data private!)
-db.sqlite3
+# Local environment variables
+.env
 
-# Django static/media
-staticfiles/
-media/
-
-# IDE files
-.vscode/
-.idea/
-
-# OS files
+# OS generated files
 .DS_Store
 Thumbs.db
