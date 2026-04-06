@@ -27,5 +27,56 @@ Follow these steps to get the project running locally:
 
 ### 1. Clone the Repository
 ```bash
-git clone [https://github.com/yuul-b-awlright/hangarin.git](https://github.com/yuul-b-awlright/hangarin.git)
+git clone https://github.com/yuul-b-awlright/hangarin.git
+git clone https://github.com/yuul-b-awlright/hangarin.git
 cd hangarin
+```
+
+### 2. Activate the Virtual Environment
+Use the project's virtual environment so Django and dependencies load correctly.
+
+On Windows PowerShell:
+```powershell
+cd c:\Users\Lenovo\Desktop\gygy\hangarin\hangarin
+.\Scripts\Activate.ps1
+```
+
+Then run Django with the venv Python:
+```powershell
+python manage.py runserver
+```
+
+If you prefer not to activate the venv, run directly:
+```powershell
+.\Scripts\python.exe manage.py runserver
+```
+
+### 3. Install Dependencies
+```powershell
+pip install -r requirements.txt
+```
+
+### 4. Add OpenWeather API Key
+Create a `.env` file in the project root with:
+```text
+OPENWEATHER_API_KEY=your_real_openweather_api_key_here
+```
+
+### 5. Run Migrations
+```powershell
+python manage.py migrate
+```
+
+### 6. Start the Development Server
+```powershell
+python manage.py runserver
+```
+
+Visit `http://127.0.0.1:8000/` in your browser.
+
+---
+
+## 🔧 Notes
+* Use the virtual environment provided in `hangarin\Scripts`.
+* The application may fail to start if you run `python` from the system-wide Python instead of the project's venv.
+* Set a valid OpenWeather API key in `.env` before using the weather dashboard.

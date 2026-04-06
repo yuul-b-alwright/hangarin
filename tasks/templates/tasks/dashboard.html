@@ -1,183 +1,376 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hangarin | Task Manager</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Hangarin | Task Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root { 
+        --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; 
+        --warning: #f39c12; --info: #3498db; --gray: #95a5a6; --light: #f4f7f6;
+    }
     
-    <style>
-        :root { 
-            --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; 
-            --warning: #f39c12; --info: #3498db; --gray: #95a5a6; --light: #f4f7f6;
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: var(--light); color: #333; }
+    
+    /* Sidebar */
+    .sidebar { width: 260px; background: var(--primary); color: white; height: 100vh; padding: 25px; position: fixed; }
+    .sidebar h2 { font-weight: 300; letter-spacing: 2px; }
+    .sidebar a { color: #bdc3c7; text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 12px 0; transition: 0.3s; }
+    .sidebar a:hover { color: white; padding-left: 8px; }
+    
+    /* Main Content */
+    .main-content { margin-left: 310px; padding: 40px; width: calc(100% - 310px); max-width: 900px; }
+    
+    /* Progress Bar */
+    .progress-container { background: #ddd; border-radius: 10px; height: 12px; margin: 20px 0; overflow: hidden; }
+    .progress-fill { background: var(--success); height: 100%; transition: width 0.8s ease-in-out; }
+
+    /* Task Cards */
+    .task-card { 
+        background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; 
+        display: flex; justify-content: space-between; align-items: center; 
+        border-left: 6px solid var(--gray);
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .task-card:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+    
+    /* Dynamic Border Colors based on Priority */
+    .priority-High { border-left-color: var(--danger) !important; }
+    .priority-Medium { border-left-color: var(--warning) !important; }
+    .priority-Low { border-left-color: var(--success) !important; }
+    
+    .completed { opacity: 0.6; background: #f9f9f9; }
+    .completed h3 { text-decoration: line-through; color: var(--gray); }
+    
+    /* Badges */
+    .badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; font-weight: bold; text-transform: uppercase; }
+    .badge-category { background: #e3f2fd; color: #1976d2; margin-right: 5px; }
+    
+    /* Priority Badge Colors */
+    .badge-High { background: #ffebee; color: #c62828; }
+    .badge-Medium { background: #fff3e0; color: #e65100; }
+    .badge-Low { background: #e8f5e9; color: #2e7d32; }
+
+    .btn-add { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold; transition: 0.2s; }
+    .btn-add:hover { background: #34495e; }
+    .btn-icon { background: none; border: none; cursor: pointer; transition: transform 0.2s; }
+    .btn-icon:hover { transform: scale(1.2); }
+    
+    input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; transition: 0.2s; }
+    input:focus, select:focus { border-color: var(--info); }
+
+    /* Weather Widget */
+    .weather-widget {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 320px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        z-index: 100;
+    }
+
+    .weather-widget h3 { margin: 0 0 15px 0; font-size: 18px; font-weight: 600; }
+    .weather-widget .city { font-size: 14px; opacity: 0.9; }
+    .weather-widget .temp { font-size: 32px; font-weight: 700; margin: 15px 0; }
+    .weather-widget .desc { font-size: 13px; opacity: 0.85; text-transform: capitalize; }
+    .weather-widget .detail { display: flex; justify-content: space-between; margin-top: 12px; font-size: 12px; }
+    .weather-widget .icon { width: 60px; height: 60px; margin: 10px 0; }
+
+    .topbar {
+        display: none;
+        width: 100%;
+        background: white;
+        border-radius: 12px;
+        padding: 18px 22px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        color: var(--primary);
+        font-size: 1rem;
+    }
+
+    .logout-btn {
+        background: #e67e22;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: background 0.2s ease;
+    }
+
+    .logout-btn:hover {
+        background: #d35400;
+    }
+
+    @media (max-width: 900px) {
+        .main-content {
+            margin-left: 0;
+            padding: 25px 20px;
+            width: 100%;
         }
-        
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: var(--light); color: #333; }
-        
-        /* Sidebar */
-        .sidebar { width: 260px; background: var(--primary); color: white; height: 100vh; padding: 25px; position: fixed; }
-        .sidebar h2 { font-weight: 300; letter-spacing: 2px; }
-        .sidebar a { color: #bdc3c7; text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 12px 0; transition: 0.3s; }
-        .sidebar a:hover { color: white; padding-left: 8px; }
-        
-        /* Main Content */
-        .main-content { margin-left: 310px; padding: 40px; width: calc(100% - 310px); max-width: 900px; }
-        
-        /* Progress Bar */
-        .progress-container { background: #ddd; border-radius: 10px; height: 12px; margin: 20px 0; overflow: hidden; }
-        .progress-fill { background: var(--success); height: 100%; transition: width 0.8s ease-in-out; }
 
-        /* Task Cards */
-        .task-card { 
-            background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            border-left: 6px solid var(--gray);
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        .sidebar {
+            display: none;
         }
-        .task-card:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
-        
-        /* Dynamic Border Colors based on Priority */
-        .priority-High { border-left-color: var(--danger) !important; }
-        .priority-Medium { border-left-color: var(--warning) !important; }
-        .priority-Low { border-left-color: var(--success) !important; }
-        
-        .completed { opacity: 0.6; background: #f9f9f9; }
-        .completed h3 { text-decoration: line-through; color: var(--gray); }
-        
-        /* Badges */
-        .badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; font-weight: bold; text-transform: uppercase; }
-        .badge-category { background: #e3f2fd; color: #1976d2; margin-right: 5px; }
-        
-        /* Priority Badge Colors */
-        .badge-High { background: #ffebee; color: #c62828; }
-        .badge-Medium { background: #fff3e0; color: #e65100; }
-        .badge-Low { background: #e8f5e9; color: #2e7d32; }
 
-        .btn-add { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold; transition: 0.2s; }
-        .btn-add:hover { background: #34495e; }
-        .btn-icon { background: none; border: none; cursor: pointer; transition: transform 0.2s; }
-        .btn-icon:hover { transform: scale(1.2); }
-        
-        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; transition: 0.2s; }
-        input:focus, select:focus { border-color: var(--info); }
-    </style>
-</head>
-<body>
+        .topbar {
+            display: flex;
+        }
+    }
 
-    <div class="sidebar">
-        <h2>HANGARIN</h2>
+    @media (max-width: 768px) {
+        .task-card {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 15px;
+        }
+
+        .task-card > form,
+        .task-card > div {
+            width: 100%;
+        }
+
+        .weather-widget {
+            position: relative;
+            width: calc(100% - 40px);
+            max-width: 320px;
+            bottom: auto;
+            right: auto;
+            margin: 20px auto 0;
+            padding: 18px;
+        }
+
+        .weather-widget h3 { font-size: 16px; }
+        .weather-widget .temp { font-size: 28px; }
+        .weather-widget .icon { width: 50px; height: 50px; }
+
+        header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 15px;
+        }
+
+        header form {
+            width: 100%;
+        }
+
+        .celebration-container {
+            padding: 30px 20px;
+        }
+
+        .progress-container {
+            height: 10px;
+        }
+    }
+
+    .task-card:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+
+    .celebration-container {
+        text-align: center;
+        color: var(--gray);
+        padding: 80px 50px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        margin-top: 40px;
+    }
+
+    .celebration-message {
+        font-size: 24px;
+        font-weight: 600;
+        color: #667eea;
+        margin-bottom: 30px;
+    }
+
+    .tenor-gif-embed {
+        width: 100%;
+        max-width: 1600px;
+        height: 500px;
+        border-radius: 12px;
+        overflow: hidden;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .tenor-gif-embed iframe,
+    .tenor-gif-embed img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sidebar">
+    <h2>HANGARIN</h2>
+    <hr style="border: 0; border-top: 1px solid #3e4f5f; margin: 20px 0;">
+    <nav>
+        <a href="{% url 'dashboard' %}"><span class="material-icons">dashboard</span> Dashboard</a>
         <hr style="border: 0; border-top: 1px solid #3e4f5f; margin: 20px 0;">
-        <nav>
-            <a href="{% url 'dashboard' %}"><span class="material-icons">dashboard</span> Dashboard</a>
-            <hr style="border: 0; border-top: 1px solid #3e4f5f; margin: 20px 0;">
-            <a href="{% url 'logout' %}" style="color: #e67e22;"><span class="material-icons">logout</span> Logout</a>
-        </nav>
+        <a href="{% url 'logout' %}" style="color: #e67e22;"><span class="material-icons">logout</span> Logout</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div class="topbar-left">
+            <span class="material-icons" style="font-size: 20px;">menu</span>
+            Menu
+        </div>
+        <a href="{% url 'logout' %}" class="logout-btn"><span class="material-icons">logout</span> Logout</a>
     </div>
 
-    <div class="main-content">
-        <header style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>My Goals, {{ user.username }}</h1>
-            <form method="GET" style="display: flex; gap: 10px;">
-                <input type="text" name="search" placeholder="Search tasks..." value="{{ search_query|default:'' }}">
-                <button type="submit" class="btn-icon"><span class="material-icons">search</span></button>
-            </form>
-        </header>
+    <header style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>My Goals, {{ user.username }}</h1>
+        <form method="GET" style="display: flex; gap: 10px;">
+            <input type="text" name="search" placeholder="Search tasks..." value="{{ search_query|default:'' }}">
+            <button type="submit" class="btn-icon"><span class="material-icons">search</span></button>
+        </form>
+    </header>
 
-        <div style="margin-top: 20px;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;">
-                <span>Completion Status</span>
-                <span>{{ progress_percentage|floatformat:0 }}%</span>
-            </div>
-            <div class="progress-container">
-                <div class="progress-fill" style="width: {{ progress_percentage }}%;"></div>
-            </div>
+    <div style="margin-top: 20px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;">
+            <span>Completion Status</span>
+            <span>{{ progress_percentage|floatformat:0 }}%</span>
         </div>
+        <div class="progress-container">
+            <div class="progress-fill" style="width: {{ progress_percentage }}%;"></div>
+        </div>
+    </div>
 
-        <section style="background: white; padding: 25px; border-radius: 15px; margin: 30px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
-            <form method="POST" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                {% csrf_token %}
-                <input type="text" name="title" placeholder="What needs to be done?" required style="flex: 2; min-width: 200px;">
-                <input type="datetime-local" name="deadline" required>
-                
-                <select name="priority" required>
-                    <option value="" disabled selected>Priority</option>
-                    {% for p in priorities %}
-                        <option value="{{ p.id }}">{{ p.name }}</option>
-                    {% endfor %}
-                </select>
+    <section style="background: white; padding: 25px; border-radius: 15px; margin: 30px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+        <form method="POST" style="display: flex; gap: 12px; flex-wrap: wrap;">
+            {% csrf_token %}
+            <input type="text" name="title" placeholder="What needs to be done?" required style="flex: 2; min-width: 200px;">
+            <input type="datetime-local" name="deadline" required>
+            
+            <select name="priority" required>
+                <option value="" disabled selected>Priority</option>
+                {% for p in priorities %}
+                    <option value="{{ p.id }}">{{ p.name }}</option>
+                {% endfor %}
+            </select>
 
-                <select name="category" required>
-                    <option value="" disabled selected>Category</option>
-                    {% for c in categories %}
-                        <option value="{{ c.id }}">{{ c.name }}</option>
-                    {% endfor %}
-                </select>
+            <select name="category" required>
+                <option value="" disabled selected>Category</option>
+                {% for c in categories %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                {% endfor %}
+            </select>
 
-                <button type="submit" name="add_task" class="btn-add">
-                    <span class="material-icons">save</span> Save
-                </button>
-            </form>
-        </section>
+            <button type="submit" name="add_task" class="btn-add">
+                <span class="material-icons">save</span> Save
+            </button>
+        </form>
+    </section>
 
-        <div class="task-list">
-            {% for task in tasks %}
-            <div class="task-card priority-{{ task.priority.name }} {% if task.is_completed %}completed{% endif %}">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <form method="POST">
-                        {% csrf_token %}
-                        <input type="hidden" name="toggle_id" value="{{ task.id }}">
-                        <button type="submit" class="btn-icon">
-                            {% if task.is_completed %}
-                                <span class="material-icons" style="color: var(--success);">check_circle</span>
-                            {% else %}
-                                <span class="material-icons" style="color: #ddd; font-size: 30px;">radio_button_unchecked</span>
-                            {% endif %}
-                        </button>
-                    </form>
-
-                    <div>
-                        <h3 style="margin: 0;">{{ task.title }}</h3>
-                        <div style="margin-top: 8px; display: flex; align-items: center; gap: 5px;">
-                            <span class="badge badge-category">{{ task.category.name }}</span>
-                            <span class="badge badge-{{ task.priority.name }}">{{ task.priority.name }}</span>
-                            <small style="color: var(--gray); margin-left: 10px; display: flex; align-items: center; gap: 3px;">
-                                <span class="material-icons" style="font-size: 14px;">event</span> 
-                                {{ task.deadline|date:"M d, Y" }}
-                            </small>
-                        </div>
-                    </div>
-                </div>
-                
-                <form method="POST" onsubmit="return confirm('Permanently remove this task?');">
+    <div class="task-list">
+        {% for task in tasks %}
+        <div class="task-card priority-{{ task.priority.name }} {% if task.is_completed %}completed{% endif %}">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <form method="POST">
                     {% csrf_token %}
-                    <input type="hidden" name="delete_id" value="{{ task.id }}">
+                    <input type="hidden" name="toggle_id" value="{{ task.id }}">
                     <button type="submit" class="btn-icon">
-                        <span class="material-icons" style="color: #ffcdd2;">delete</span>
+                        {% if task.is_completed %}
+                            <span class="material-icons" style="color: var(--success);">check_circle</span>
+                        {% else %}
+                            <span class="material-icons" style="color: #ddd; font-size: 30px;">radio_button_unchecked</span>
+                        {% endif %}
                     </button>
                 </form>
-            </div>
-            {% empty %}
-                <div style="text-align: center; color: var(--gray); padding: 50px;">
-                    <span class="material-icons" style="font-size: 48px; opacity: 0.3;">assignment_turned_in</span>
-                    <p>No tasks yet! Time to set some goals.</p>
+
+                <div>
+                    <h3 style="margin: 0;">{{ task.title }}</h3>
+                    <div style="margin-top: 8px; display: flex; align-items: center; gap: 5px;">
+                        <span class="badge badge-category">{{ task.category.name }}</span>
+                        <span class="badge badge-{{ task.priority.name }}">{{ task.priority.name }}</span>
+                        <small style="color: var(--gray); margin-left: 10px; display: flex; align-items: center; gap: 3px;">
+                            <span class="material-icons" style="font-size: 14px;">event</span> 
+                            {{ task.deadline|date:"M d, Y" }}
+                        </small>
+                    </div>
                 </div>
-            {% endfor %}
+            </div>
+            
+            <form method="POST" onsubmit="return confirm('Permanently remove this task?');">
+                {% csrf_token %}
+                <input type="hidden" name="delete_id" value="{{ task.id }}">
+                <button type="submit" class="btn-icon">
+                    <span class="material-icons" style="color: #ffcdd2;">delete</span>
+                </button>
+            </form>
         </div>
+        {% empty %}
+            <div class="celebration-container">
+                <div class="celebration-message">
+                    {% if progress_percentage == 100 %}
+                        🎉 Amazing! You completed all your goals! 🎉
+                    {% else %}
+                        Time to set some goals! 🚀
+                    {% endif %}
+                </div>
+                <div class="tenor-gif-embed" data-postid="17107758709618840273" data-share-method="host" data-aspect-ratio="3.2" data-width="1600">
+                    <a href="https://tenor.com/view/uma-musume-meep-low-cortisol-dance-chibi-gif-17107758709618840273">Uma Musume Meep GIF</a>from 
+                    <a href="https://tenor.com/search/uma+musume-gifs">Uma Musume GIFs</a>
+                </div>
+            </div>
+        {% endfor %}
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script>
-        const progress = {{ progress_percentage|default:0 }};
-        const taskCount = {{ tasks.count|default:0 }};
-        if (progress === 100 && taskCount > 0) {
-            confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#27ae60', '#f39c12', '#3498db']
-            });
-        }
-    </script>
-</body>
-</html>
+    <!-- Weather Widget -->
+    {% if weather %}
+    <div class="weather-widget" {% if weather.is_demo %}style="opacity: 0.8; border: 2px dashed rgba(255,255,255,0.3);"{% endif %}>
+        <h3>🌤️ Weather {% if weather.is_demo %}<span style="font-size: 11px; opacity: 0.7;">(demo)</span>{% endif %}</h3>
+        <div class="city">{{ weather.city }}, {{ weather.country }}</div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <div class="temp">{{ weather.temp }}°C</div>
+                <div class="desc">{{ weather.description }}</div>
+                <div class="detail">
+                    <span>💧 {{ weather.humidity }}%</span>
+                </div>
+            </div>
+            <img src="https://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="weather" class="icon">
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+    const progress = {{ progress_percentage|default:0 }};
+    const taskCount = {{ tasks.count|default:0 }};
+    if (progress === 100 && taskCount > 0) {
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#27ae60', '#f39c12', '#3498db']
+        });
+    }
+</script>
+
+<!-- Tenor GIF Embed Script -->
+<script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+{% endblock %}

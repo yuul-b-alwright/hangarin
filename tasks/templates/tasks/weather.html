@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Weather Dashboard - Hangarin{% endblock %}
+
+{% block extra_css %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 40px;
+        max-width: 500px;
+        width: 100%;
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 28px;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+    }
+
+    .search-form input {
+        flex: 1;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+    }
+
+    .search-form input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    .search-form button {
+        padding: 12px 25px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: background 0.3s;
+    }
+
+    .search-form button:hover {
+        background: #5568d3;
+    }
+
+    .weather-content {
+        text-align: center;
+    }
+
+    .error {
+        background: #fee;
+        color: #c33;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 4px solid #c33;
+    }
+
+    .weather-info {
+        animation: slideIn 0.5s ease-in;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .weather-header {
+        margin-bottom: 20px;
+    }
+
+    .city-name {
+        font-size: 32px;
+        color: #333;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .weather-icon {
+        width: 120px;
+        height: 120px;
+        margin: 20px auto;
+    }
+
+    .temperature {
+        font-size: 48px;
+        color: #667eea;
+        font-weight: 700;
+        margin: 20px 0;
+    }
+
+    .temperature span {
+        font-size: 32px;
+    }
+
+    .description {
+        font-size: 20px;
+        color: #666;
+        margin: 15px 0;
+        text-transform: capitalize;
+    }
+
+    .details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 25px;
+        text-align: left;
+    }
+
+    .detail-item {
+        background: #f5f5f5;
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    .detail-label {
+        color: #999;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .detail-value {
+        color: #333;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 25px;
+        padding: 12px 20px;
+        background: #f0f0f0;
+        color: #333;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: background 0.3s;
+    }
+
+    .back-link:hover {
+        background: #e0e0e0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>🌤️ Weather Dashboard</h1>
+
+    <form method="get" class="search-form">
+        <input type="text" name="city" placeholder="Enter city name" value="{{ city }}" required />
+        <button type="submit">Search</button>
+    </form>
+
+    <div class="weather-content">
+        {% if weather.error %}
+        <div class="error">
+            <strong>{{ weather.error }}</strong>
+            {% if weather.details %}
+            <pre style="margin-top: 10px; text-align: left; white-space: pre-wrap;">{{ weather.details }}</pre>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="weather-info">
+            <div class="weather-header">
+                <div class="city-name">{{ weather.city }}, {{ weather.country }}</div>
+            </div>
+
+            <img src="https://openweathermap.org/img/wn/{{ weather.icon }}@4x.png" alt="weather icon"
+                class="weather-icon" />
+
+            <div class="temperature">
+                {{ weather.temp }}<span>°C</span>
+            </div>
+
+            <div class="description">{{ weather.description }}</div>
+
+            <div class="details">
+                <div class="detail-item">
+                    <div class="detail-label">Feels Like</div>
+                    <div class="detail-value">{{ weather.feels_like }}°C</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Humidity</div>
+                    <div class="detail-value">{{ weather.humidity }}%</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div style="text-align: center;">
+        <a href="{% url 'dashboard' %}" class="back-link">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

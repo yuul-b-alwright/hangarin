@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Setup{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 700px;
+        width: 100%;
+        padding: 50px;
+    }
+
+    h1 {
+        font-size: 28px;
+        color: #667eea;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .instructions {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 20px;
+        border-radius: 8px;
+        line-height: 1.8;
+    }
+
+    .instructions p {
+        margin: 12px 0;
+        color: #333;
+        font-size: 15px;
+    }
+
+    .instructions a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .instructions a:hover {
+        text-decoration: underline;
+    }
+
+    .code-block {
+        background: #2c3e50;
+        color: #ecf0f1;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 10px 0;
+        font-family: 'Courier New', monospace;
+        overflow-x: auto;
+        font-size: 13px;
+    }
+
+    .success-button {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 12px 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: 0.3s ease;
+    }
+
+    .success-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .note {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+        color: #856404;
+        font-size: 14px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ title }}</h1>
+
+    <div class="instructions">
+        {% for instruction in instructions %}
+            <p>{{ instruction|safe }}</p>
+        {% endfor %}
+    </div>
+
+    <div class="note">
+        <strong>💡 After setup:</strong><br>
+        Once you've created the Social Application in Django admin, the {{ provider|title }} login button will work automatically!
+    </div>
+
+    <center>
+        <a href="/" class="success-button">← Back to Login</a>
+    </center>
+</div>
+{% endblock %}
